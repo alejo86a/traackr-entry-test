@@ -1,0 +1,14 @@
+{
+  "name": "people-name-coding-test-by-alejo86a",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "alejo86a",
+  "license": "ISC",
+  "dependencies": {
+    "event-stream": "^4.0.1"
+  }
+}
