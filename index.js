@@ -1,84 +1,92 @@
-var fs= require('fs'),
-    es = require('event-stream');
+const fs = require('fs');
+const readline = require('readline');
+const stream = require('stream');
+
+console.time('process');
+
+  
+const fileName = 'coding-test-data3.txt'
+const instream = fs.createReadStream(fileName);
+const outstream = new stream();
+const lineReader = readline.createInterface(instream, outstream);
 let totalLines = 0;
-let names = [];
-let lastNames = [];
 
-var s= fs
-    .createReadStream('coding-test-data3.txt')
-    .pipe(es.split())
-    .pipe(es.mapSync(function(line){
-        totalLines++;
-        let splited = line.match('([A-Za-z]+),\\s*([A-Za-z]+)n?');
-        if(splited){
-            let [fullName, name, lastName] = splited;
-            insertIn(names, name, lastName);
-            insertIn(lastNames, lastName, name)
-        }
+const fullNames = []; // Array of string 'lastName, name'
+const names = {}; // Dictionary of names {name: count}
+const lastNames = {}; // Dictionary of last names {last: count}
+const regExpAlphabet= /^[a-zA-Z]+$/i;
+const maxOfNames = 25   // max of names to be considered
 
-    })
-    .on('error', function(err){
-        console.log('Error: ' + err);
-    }))
-    .on('end', function(){
-        console.log('Cardinality by name: ' + countByName()+ ' Cardinality by lastName: ' + countByLastName() +' Cardinality by full name: ' + countByFullName());
-        console.log('The ten most common last names sorted in descending order '+ orderBy(lastNames).join(', '));
-        console.log('The ten most common first names sorted in descending order '+ orderBy(names).join(', '));
-        // let step1 = getStep1();
-        // console.log('step1',step1)
-        // console.log('step2',getStep2(step1,25))
-        // console.log('Done',totalLines);
-    });
-
-function splitLine(line){
-    // hacerlo con RegExp
-    // validar que el nombre y apellido sean AZza
-    let split = line.split(' ');
-    return {name: split[0].slice(0,-1),lastName: split[1]};
-}
-
-function insertIn(arr, key, value){
-    let i = arr.findIndex(x=>x.key===key);
-    if (i===-1) {
-        arr.push({key: key, value: (new Set()).add(value)})
+const insertIn = (arr, key)=>{
+    let value = arr[key];
+    if (typeof value!=='undefined') {
+        return arr[key]+=1;
     } else {
-        arr[i].value.add(value)
+        return arr[key]=1;
     }
 }
+const isValidFullName = nameSplited => !regExpAlphabet.test(nameSplited[0]) || !regExpAlphabet.test(nameSplited[1]);
 
-function countByName(){
-    return names.length
+const countBy = (arr) =>{
+    return Object.keys(arr).length
 }
 
-function countByLastName(){
-    return lastNames.length
+const countByFullName= ()=>{
+    return 1
+}  
+
+const orderBy=(arr)=>{
+    return Object.entries(arr).sort((a,b)=>b[1]-a[1]).slice(0,10).map(x=>x[0]+' with '+x[1])
 }
 
-function countByFullName(){
-    return names.reduce((a,b)=>a+b.value.size,0)
-}
-
-function orderBy(arr){
-    return arr.sort((a,b)=>b.value.size-a.value.size).slice(0,10).map(x=>x.key+': '+x.value.size)
-}
-
-function getStep1(){
-    return names.reduce((a,b)=>{
-        let aux = Array.from(b.value);
-        let result = aux.filter(x => !(a.map(y=>y.value).includes(x)))
-        if(result.length!==0){
-            a.push({key: b.key, value: result[0]})
+const getStep1=()=>{
+    const a = [];
+    for (let i = 0; i < fullNames.length; i++) {
+        const auxNameSplited = fullNames[i].split(', ');
+        if(a.length===maxOfNames) break;
+        if(a.findIndex(x=>x.name===auxNameSplited[1])===-1 && a.findIndex(x=>x.lastName===auxNameSplited[0])===-1){
+            a.push({name: auxNameSplited[1], lastName: auxNameSplited[0]})
         }
-        return a
-    },[]);
+    }
+    return a;
 }
 
-function getStep2(step1,n){
-    return step1.reduce((a,b)=>a.concat(step1.filter(x=>x.value.localeCompare(b.value)).map(x=>x.value+', '+b.key)),[]);
-    // let a = [];
-    // for(let i=0;i<n;i++){
-    //     a.push(step1[i].key+', '+step1[(i+1)].value)
-    // }
-    // return a;
-
+const getStep2=(step1)=>{
+    if(step1.length<2) return 'It is not possible to create a step 2';
+    return step1.map((x,i)=>{
+        return {name: i===(step1.length-1)?step1[0].name:step1[(i+1)].name, lastName: x.lastName}
+    });
 }
+  
+lineReader.on('line', line => {
+    totalLines = (totalLines + 1)%2;
+    if(totalLines===1){
+        const fullName = line.split(' -- ')[0];
+        const nameSplited = fullName.split(', ');
+        if (nameSplited.length !== 2 || isValidFullName(nameSplited)) {
+            return;
+          }
+
+        const lastName = nameSplited[0];
+        const firstName = nameSplited[1];
+
+
+        fullNames.push(fullName);
+
+        lastNames[lastName] = insertIn(lastNames, lastName);
+        names[firstName] = insertIn(names, firstName);
+
+    }
+    
+    
+
+  });  
+  lineReader.on('close', () => {
+    console.log('Cardinality by name: ' + countBy(names)+ ' Cardinality by lastName: ' + countBy(lastNames) +' Cardinality by full name: ' + fullNames.length);
+    console.log('The ten most common last names sorted in descending order '+ orderBy(lastNames).join(', '));
+    console.log('The ten most common first names sorted in descending order '+ orderBy(names).join(', '));
+    const step1 = getStep1();
+    console.log('step1',step1)
+    console.log('step2',getStep2(step1))
+    console.timeEnd('process')
+  });
