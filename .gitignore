@@ -1,3 +1,6 @@
-*.txt
 /node_modules
 .DS_Store
+index.js
+coding-test-data3.txt
+coding-test-data3 copy.txt
+todo.txt
