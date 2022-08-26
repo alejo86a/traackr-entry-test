@@ -105,13 +105,13 @@ describe('orderBy', () => {
     it('should return ordered array if the array has four elements with wrong order', () => {
         const arr = {a: 1, b: 2, c: 3, d: 4};
         const result = orderBy(arr);
-        const expected = ['d with 4', 'c with 3', 'b with 2', 'a with 1'];
+        const expected = ['1) d with 4', '2) c with 3', '3) b with 2', '4) a with 1'];
         assert.deepEqual(result, expected);
     }),
     it('should return ordered array if the array has four elements even with the rigth order', () => {
         const arr = {a: 4, b: 3, c: 2, d: 1};
         const result = orderBy(arr);
-        const expected = ['a with 4', 'b with 3', 'c with 2', 'd with 1'];
+        const expected = ['1) a with 4', '2) b with 3', '3) c with 2', '4) d with 1'];
         assert.deepEqual(result, expected);
     })
 });

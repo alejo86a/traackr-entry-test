@@ -39,7 +39,7 @@ const countBy = (arr) =>{
 
 // returns the first 10 elements with the most occurrences. By the way it is agnostic to whether it is the array of names or surnames
 const orderBy=(arr)=>{
-    return Object.entries(arr).sort((a,b)=>b[1]-a[1]).slice(0,10).map(x=>x[0]+' with '+x[1])
+    return Object.entries(arr).sort((a,b)=>b[1]-a[1]).slice(0,10).map((x,i)=>(i+1)+') '+x[0]+' with '+x[1])
 }
 
 // iterates through the above data structure to find the first occurrence of each first and last name by inserting the full name without repeats into the resulting array up to the given limit
@@ -87,11 +87,10 @@ lineReader.on('line', line => {
 
 // From the data stored in our data structure, it calls the functions that process them and continues printing the information required by the test in the console.
 lineReader.on('close', () => {
-    console.log('Cardinality by name: ' + countBy(names)+ ' Cardinality by lastName: ' + countBy(lastNames) +' Cardinality by full name: ' + fullNames.length);
-    console.log('The ten most common last names sorted in descending order '+ orderBy(lastNames).join(', '));
-    console.log('The ten most common first names sorted in descending order '+ orderBy(names).join(', '));
+    console.log('Cardinality by name: ' + countBy(names)+ ' Cardinality by lastName: ' + countBy(lastNames) +' Cardinality by full name: ' + fullNames.length+'/n');
+    console.log('The ten most common last names sorted in descending order '+ orderBy(lastNames).join('/n'));
+    console.log('The ten most common first names sorted in descending order '+ orderBy(names).join('/n'));
     const step1 = getStep1(fullNames);
-    console.log('step1',step1)
     console.log('step2',getStep2(step1))
     console.timeEnd('process')
 });

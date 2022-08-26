@@ -4,6 +4,8 @@ This is my proposed solution for the exercise. It was tested with the given file
 
 If you want to change the parameters for the application, in the index.js file line 8 is the path of the file to test and line 9 is the number of modified names to generate
 
+In roder to run the test you need to install mocha globally with `npm install --global mocha` or please refer to the official website [here](https://mochajs.org/).
+
 ### first install the dependencies 
 `npm i`
 
